@@ -11,50 +11,46 @@
 
 nextflow.enable.dsl = 2
 
-////////////////////////////////////////////////////
-/* --               PRINT HELP                 -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+    GENOME PARAMETER VALUES
+========================================================================================
+*/
 
-log.info Utils.logo(workflow, params.monochrome_logs)
+// def primer_set         = ''
+// def primer_set_version = 0
+// if (!params.public_data_ids && params.platform == 'illumina' && params.protocol == 'amplicon') {
+//     primer_set         = params.primer_set
+//     primer_set_version = params.primer_set_version
+// } else if (!params.public_data_ids && params.platform == 'nanopore') {
+//     primer_set          = 'artic'
+//     primer_set_version  = params.primer_set_version
+//     params.artic_scheme = WorkflowMain.getGenomeAttribute(params, 'scheme', log, primer_set, primer_set_version)
+// }
 
-def json_schema = "$projectDir/nextflow_schema.json"
-if (params.help) {
-    // TODO nf-core: Update typical command used to run pipeline
-    def command = "nextflow run nf-core/benchmark --input samplesheet.csv --genome GRCh37 -profile docker"
-    log.info NfcoreSchema.paramsHelp(workflow, params, json_schema, command)
-    log.info Workflow.citation(workflow)
-    log.info Utils.dashedLine(params.monochrome_logs)
-    exit 0
-}
+// params.fasta         = WorkflowMain.getGenomeAttribute(params, 'fasta'     , log, primer_set, primer_set_version)
+// params.gff           = WorkflowMain.getGenomeAttribute(params, 'gff'       , log, primer_set, primer_set_version)
+// params.bowtie2_index = WorkflowMain.getGenomeAttribute(params, 'bowtie2'   , log, primer_set, primer_set_version)
+// params.primer_bed    = WorkflowMain.getGenomeAttribute(params, 'primer_bed', log, primer_set, primer_set_version)
 
-////////////////////////////////////////////////////
-/* --        GENOME PARAMETER VALUES           -- */
-////////////////////////////////////////////////////
 
-params.fasta = Workflow.getGenomeAttribute(params, 'fasta')
+/*
+========================================================================================
+    VALIDATE & PRINT PARAMETER SUMMARY
+========================================================================================
+*/
 
-////////////////////////////////////////////////////
-/* --         PRINT PARAMETER SUMMARY          -- */
-////////////////////////////////////////////////////
+WorkflowMain.initialise(workflow, params, log)
 
-def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params, json_schema)
-log.info NfcoreSchema.paramsSummaryLog(workflow, params, json_schema)
-log.info Workflow.citation(workflow)
-log.info Utils.dashedLine(params.monochrome_logs)
-
-////////////////////////////////////////////////////
-/* --         VALIDATE PARAMETERS              -- */
-////////////////////////////////////////////////////
-
-Workflow.validateMainParams(workflow, params, json_schema, log)
-
-////////////////////////////////////////////////////
-/* --            RUN WORKFLOW(S)               -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+    NAMED WORKFLOW FOR PIPELINE
+========================================================================================
+*/
 
 workflow  NFCORE_BENCHMARK {
-    include { BENCHMARK } from './workflows/pipeline' addParams( summary_params: summary_params )
-    BENCHMARK ()
+    include { PIPELINE } from './workflows/pipeline' //addParams( summary_params: summary_params )
+    PIPELINE ()
 }
 
 workflow {
