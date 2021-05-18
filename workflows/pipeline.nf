@@ -29,9 +29,28 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
+params.path_to_pipelines = "${projectDir}/pipelines"
+params.pipeline_path     = "${params.path_to_pipelines}/${params.pipeline}" // TODO remove and directly
+params.pipeline = "tcoffee" //TODO hardcoded now
+pipeline_module = file( "${params.pipeline_path}/main.nf" )
+
 // TODO adapt to pipeline
 if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
-if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file                   }
+// TODO define params such as in the case of viralrecon e.g. params.pipeline
+if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not correctly included in nf-benchmark: ${params.pipeline}"
+
+// if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file                   } //delete
+
+
+
+// Pipeline meta-information from the pipeline
+yamlPathPipeline = "${params.pipeline_path}/meta.yml" //TODO check if exists
+csvPathMethods = "${workflow.projectDir}/assets/methods2benchmark.csv"
+pipeline_module = file( "${params.pipeline_path}/main.nf" )
+
+def input_pipeline_param = WorkflowPipeline.setInputParam(yamlPathPipeline)
+
+def infoBenchmark = WorkflowPipeline.setBenchmark(params, yamlPathPipeline, csvPathMethods, params.pipeline, input_pipeline_param)
 
 /*
 ========================================================================================
@@ -55,57 +74,12 @@ if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spa
 // Don't overwrite global params.modules, create a copy instead and use that within the main script.
 
 // include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] )
-// include { CUTADAPT                   } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']      )
-// include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['csv':'']]       )
-// include { MULTIQC                    } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                   )
-// include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
-// include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
-// include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED       } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
-// include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
-// include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
+
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-// def publish_genome_options    = params.save_reference ? [publish_dir: 'genome']       : [publish_files: false]
-// def publish_index_options     = params.save_reference ? [publish_dir: 'genome/index'] : [publish_files: false]
-// def publish_db_options        = params.save_reference ? [publish_dir: 'genome/db']    : [publish_files: false]
-// def bedtools_getfasta_options = modules['illumina_bedtools_getfasta']
-// def bowtie2_build_options     = modules['illumina_bowtie2_build']
-// def snpeff_build_options      = modules['illumina_snpeff_build']
-// def makeblastdb_options       = modules['illumina_blast_makeblastdb']
-// def kraken2_build_options     = modules['illumina_kraken2_build']
-// def collapse_primers_options  = modules['illumina_collapse_primers_illumina']
-// if (!params.save_reference) {
-//     bedtools_getfasta_options['publish_files'] = false
-//     bowtie2_build_options['publish_files']     = false
-//     snpeff_build_options['publish_files']      = false
-//     makeblastdb_options['publish_files']       = false
-//     kraken2_build_options['publish_files']     = false
-//     collapse_primers_options['publish_files']  = false
-// }
 
-// def ivar_trim_options   = modules['illumina_ivar_trim']
-// ivar_trim_options.args += params.ivar_trim_noprimer ? '' : Utils.joinModuleArgs(['-e'])
-// ivar_trim_options.args += params.ivar_trim_offset   ? Utils.joinModuleArgs(["-x ${params.ivar_trim_offset}"]) : ''
-
-// def ivar_trim_sort_bam_options = modules['illumina_ivar_trim_sort_bam']
-// if (params.skip_markduplicates) {
-//     ivar_trim_sort_bam_options.publish_files.put('bam','')
-//     ivar_trim_sort_bam_options.publish_files.put('bai','')
-// }
-
-// def spades_options   = modules['illumina_spades']
-// spades_options.args += params.spades_mode ? Utils.joinModuleArgs(["--${params.spades_mode}"]) : ''
-
-// include { INPUT_CHECK        } from '../subworkflows/local/input_check'             addParams( options: [:] )
-// include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome_illumina' addParams( genome_options: publish_genome_options, index_options: publish_index_options, db_options: publish_db_options, bowtie2_build_options: bowtie2_build_options, bedtools_getfasta_options: bedtools_getfasta_options, collapse_primers_options: collapse_primers_options, snpeff_build_options: snpeff_build_options, makeblastdb_options: makeblastdb_options, kraken2_build_options: kraken2_build_options )
-// include { PRIMER_TRIM_IVAR   } from '../subworkflows/local/primer_trim_ivar'        addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
-// include { VARIANTS_IVAR      } from '../subworkflows/local/variants_ivar'           addParams( ivar_variants_options: modules['illumina_ivar_variants'], ivar_variants_to_vcf_options: modules['illumina_ivar_variants_to_vcf'], tabix_bgzip_options: modules['illumina_ivar_tabix_bgzip'], tabix_tabix_options: modules['illumina_ivar_tabix_tabix'], bcftools_stats_options: modules['illumina_ivar_bcftools_stats'], ivar_consensus_options: modules['illumina_ivar_consensus'], consensus_plot_options: modules['illumina_ivar_consensus_plot'], quast_options: modules['illumina_ivar_quast'], snpeff_options: modules['illumina_ivar_snpeff'], snpsift_options: modules['illumina_ivar_snpsift'], snpeff_bgzip_options: modules['illumina_ivar_snpeff_bgzip'], snpeff_tabix_options: modules['illumina_ivar_snpeff_tabix'], snpeff_stats_options: modules['illumina_ivar_snpeff_stats'], pangolin_options: modules['illumina_ivar_pangolin'], nextclade_options: modules['illumina_ivar_nextclade'], asciigenome_options: modules['illumina_ivar_asciigenome'] )
-// include { VARIANTS_BCFTOOLS  } from '../subworkflows/local/variants_bcftools'       addParams( bcftools_mpileup_options: modules['illumina_bcftools_mpileup'], quast_options: modules['illumina_bcftools_quast'], consensus_genomecov_options: modules['illumina_bcftools_consensus_genomecov'], consensus_merge_options: modules['illumina_bcftools_consensus_merge'], consensus_mask_options: modules['illumina_bcftools_consensus_mask'], consensus_maskfasta_options: modules['illumina_bcftools_consensus_maskfasta'], consensus_bcftools_options: modules['illumina_bcftools_consensus_bcftools'], consensus_plot_options: modules['illumina_bcftools_consensus_plot'], snpeff_options: modules['illumina_bcftools_snpeff'], snpsift_options: modules['illumina_bcftools_snpsift'], snpeff_bgzip_options: modules['illumina_bcftools_snpeff_bgzip'], snpeff_tabix_options: modules['illumina_bcftools_snpeff_tabix'], snpeff_stats_options: modules['illumina_bcftools_snpeff_stats'], pangolin_options: modules['illumina_bcftools_pangolin'], nextclade_options: modules['illumina_bcftools_nextclade'], asciigenome_options: modules['illumina_bcftools_asciigenome'] )
-// include { ASSEMBLY_SPADES    } from '../subworkflows/local/assembly_spades'         addParams( spades_options: spades_options, bandage_options: modules['illumina_spades_bandage'], blastn_options: modules['illumina_spades_blastn'], blastn_filter_options: modules['illumina_spades_blastn_filter'], abacas_options: modules['illumina_spades_abacas'], plasmidid_options: modules['illumina_spades_plasmidid'], quast_options: modules['illumina_spades_quast'] )
-// include { ASSEMBLY_UNICYCLER } from '../subworkflows/local/assembly_unicycler'      addParams( unicycler_options: modules['illumina_unicycler'], bandage_options: modules['illumina_unicycler_bandage'], blastn_options: modules['illumina_unicycler_blastn'], blastn_filter_options: modules['illumina_unicycler_blastn_filter'], abacas_options: modules['illumina_unicycler_abacas'], plasmidid_options: modules['illumina_unicycler_plasmidid'], quast_options: modules['illumina_unicycler_quast'] )
-// include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'          addParams( minia_options: modules['illumina_minia'], blastn_options: modules['illumina_minia_blastn'], blastn_filter_options: modules['illumina_minia_blastn_filter'], abacas_options: modules['illumina_minia_abacas'], plasmidid_options: modules['illumina_minia_plasmidid'], quast_options: modules['illumina_minia_quast'] )
 
 /*
 ========================================================================================
