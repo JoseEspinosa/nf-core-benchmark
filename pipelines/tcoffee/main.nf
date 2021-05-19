@@ -9,7 +9,7 @@ nextflow.enable.dsl=2
  */
 
 // input sequences to align in fasta format
-params.sequences = "${projectDir}/test/sequences/BB11001.fa"
+params.sequences = "${moduleDir}/test/sequences/BBA0001.tfa"
 params.outdir = './results'
 
 log.info """\
@@ -26,7 +26,7 @@ include { ALIGN } from "${moduleDir}/modules/align.nf"
 // include { REFORMAT } from "${baseDir}/modules/tcoffee/reformat.nf"
 
 // Run the workflow
-workflow PIPELINE {
+workflow TCOFFEE {
     main:
     // Channel.from(params.ref_data) \
     // ALIGN (params.ref_data) \
@@ -36,9 +36,9 @@ workflow PIPELINE {
 
     emit:
     // ALIGN.out
-    alignment = ALIGN.out    
+    alignment = ALIGN.out
 }
 
 workflow {
-  PIPELINE()
+    TCOFFEE()
 }
