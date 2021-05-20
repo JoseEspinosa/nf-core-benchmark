@@ -18,6 +18,7 @@ nextflow.enable.dsl = 2
 */
 
 WorkflowMain.initialise(workflow, params, log)
+WorkflowPipeline.createModuleScript('tcoffee')
 
 /*
 ========================================================================================
@@ -27,7 +28,7 @@ WorkflowMain.initialise(workflow, params, log)
 
 workflow  NFCORE_BENCHMARK {
     // include { RUN_PIPELINE } from './workflows/pipeline' //addParams( summary_params: summary_params )
-    include { TEST_PIPELINE } from './dynamic/test_pipeline/main.nf' //addParams( summary_params: summary_params )
+    include { TEST_PIPELINE } from './dynamic/test_pipeline' //addParams( summary_params: summary_params )
     // TODO Do it the other way around i.e. include the RUN_PIPELINE script and from it create the script and launch
     TEST_PIPELINE ()
 }
