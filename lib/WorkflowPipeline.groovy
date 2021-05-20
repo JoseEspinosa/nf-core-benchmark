@@ -71,6 +71,58 @@ class WorkflowPipeline {
     //     }
     // }
     }
+
+    //
+    // Function to dynamically create a nextflow script to run the pipeline/benchmarker
+    //
+    public static void createModuleScript (module_name, dynamic_module_dir="") {
+        // Check if exists
+        // Delete if exists
+        // Should be placed in the same folder as the original main.nf otherwise nextflow.config won't be read
+        // Not even, this should be control from the main nf-core-benchmark
+        // Use the module name to generate the file name
+
+        // do not check for name but for changed path like in nextflow!!!
+        def md5 = module_name.md5().toString().substring(0,6)
+        // interpolate PATH!!!
+
+        def path_to_main = "/Users/jaespinosa/git/nf-core-benchmark/tmp/main_${md5}.nf"
+
+        println "DEV=========..... $md5"
+
+        def moduleFile = new File(path_to_main)
+        def directory = new File(moduleFile.getParent())
+        println "DEV========= $directory"
+        directory.mkdir()
+        moduleFile.createNewFile()
+
+        // println "=============== projectDir"
+        def module_name_upper_case = module_name.toUpperCase()
+        // NF_BENCHMARK
+
+        moduleFile.text = """
+        #!/usr/bin/env nextflow
+
+        nextflow.enable.dsl=2
+
+        include { ${module_name_upper_case} } from "/pipelines/${module_name}/main.nf"
+
+        workflow RUN_PIPELINE {
+
+            ${module_name_upper_case}()
+        }
+
+        workflow {
+            RUN_PIPELINE()
+        }
+        """.stripIndent()
+
+        //execute permission
+        "chmod +x $moduleFile".execute()
+        // done
+        // println "+ Nextflow package `CORE` copied to: $releaseDir\n"
+    }
+
     //
     // Function to read yml file
     //
