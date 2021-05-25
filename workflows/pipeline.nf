@@ -124,8 +124,15 @@ def multiqc_report    = []
 def pass_mapped_reads = [:]
 def fail_mapped_reads = [:]
 
+module_script = WorkflowPipeline.createModuleScript(params.pipeline, workflow) //#DEL substitute by params.pipeline
+
+include { RUN_PIPELINE } from "$projectDir/tmp/$module_script"
+
 workflow PIPELINE {
+
     ch_software_versions = Channel.empty()
+
+    RUN_PIPELINE ()
 }
 
 /*
