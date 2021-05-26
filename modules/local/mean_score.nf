@@ -1,7 +1,14 @@
 process MEAN_SCORE {
     tag { 'benchmark_mean' }
     publishDir "${params.outdir}/tcoffee"
-    container 'joseespinosa/r-base@sha256:cc35d5e41d1252709b3c9c8a166daaab7e3231ec57a97113814f0345fcf19b54'
+    container 'quay.io/biocontainers/r-base:3.5.0'
+
+    // conda (params.enable_conda ? 'bioconda::r-base=3.5.0' : null)
+    // if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+    //     container 'https://depot.galaxyproject.org/singularity/r-base:3.5.0'
+    // } else {
+    //     container 'quay.io/biocontainers/r-base:3.5.0'
+    // }
 
     input:
     file (scores)
