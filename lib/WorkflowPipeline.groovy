@@ -16,7 +16,7 @@ class WorkflowPipeline {
 
         // Generic parameter validation
         if (!params.pipeline) { // TODO
-            log.error ("Pipeline to be included not specified with e.g. '--pipeline tcoffee' or via a detectable config file.")
+            log.error ("Pipeline to be included not specified with e.g. '--pipeline your_pipeline' or via a detectable config file.")
             System.exit(1)
         }
         // if (false) {
@@ -75,7 +75,7 @@ class WorkflowPipeline {
     //
     // Function to dynamically create a nextflow script to run the pipeline/benchmarker
     //
-    public static String createModuleScript (module_name, dynamic_module_dir="") {
+    public static String createModuleScript (module_name, workflow, workflow_name) {
         // Check if exists
         // Delete if exists
         // Should be placed in the same folder as the original main.nf otherwise nextflow.config won't be read
@@ -84,37 +84,40 @@ class WorkflowPipeline {
 
         // do not check for name but for changed path like in nextflow!!!
         def md5 = module_name.md5().toString().substring(0,6)
-        // interpolate PATH!!!
-
         def file_name = "main_${md5}.nf"
-        def path_to_file = "/Users/jaespinosa/git/nf-core-benchmark/tmp/" + file_name
-        //def path_to_file = "/Users/jaespinosa/git/nf-core-benchmark/tmp/
-
-        println "DEV=========..... $md5"
-
+        // def path_to_file = "/Users/jaespinosa/git/nf-core-benchmark/tmp/" + file_name
+        def path_to_file = "${workflow.projectDir}/tmp/" + file_name
         def moduleFile = new File(path_to_file)
         def directory = new File(moduleFile.getParent())
-        println "DEV========= $directory"
-        directory.mkdir()
+
+        directory.mkdir() // TODO not needed?
         moduleFile.createNewFile()
 
-        // println "=============== projectDir"
-        def module_name_upper_case = module_name.toUpperCase()
-        // NF_BENCHMARK
+        // def worflow_dir = { ${workflow_name} == 'pipeline' ? 'pipelines' : ${workflow_name} == 'pipeline'?  }
+        // { task.exitStatus in [143,137,104,134,139] ? 'retry' : 'finish' }
+        def module_name_upper_case   = module_name.toUpperCase()
+        def workflow_name_upper_case = workflow_name.toUpperCase()
+        def take_clausure = workflow_name == 'benchmarker' ? 'take: data' : ''
+        def run_clausure  = workflow_name == 'benchmarker' ? module_name_upper_case + '(data)' : module_name_upper_case + '()'
 
-        moduleFile.text = """#!/usr/bin/env nextflow
+        moduleFile.text = """\
+        #!/usr/bin/env nextflow
 
         nextflow.enable.dsl=2
 
-        include { ${module_name_upper_case} } from "../pipelines/${module_name}/main.nf"
+        include { ${module_name_upper_case} } from "../${workflow_name}s/${module_name}/main.nf"
 
-        workflow RUN_PIPELINE {
+        workflow RUN_${workflow_name_upper_case} {
+            ${take_clausure}
+            main:
+            ${run_clausure}
 
-            ${module_name_upper_case}()
+            emit:
+            ${workflow_name} = ${module_name_upper_case}.out
         }
 
         workflow {
-            RUN_PIPELINE()
+            RUN_${workflow_name_upper_case}()
         }
         """.stripIndent()
 
@@ -191,7 +194,7 @@ class WorkflowPipeline {
 
         //TODO check that configYmlFile exists here or outside
 
-        println "CHIVATO=== configYmlFile =========== $configYmlFile" //delete
+        // println "CHIVATO=== configYmlFile =========== $configYmlFile" //delete
         // System.exit(1)
 
         def fileYml = new File(configYmlFile)
@@ -206,17 +209,16 @@ class WorkflowPipeline {
         def output_data = pipelineConfig.output.alignment.edam_data[0][0]
         def output_format = pipelineConfig.output.alignment.edam_format[0][0]
 
-        /*
-        log.info """
-        INFO: pipeline ........... $pipeline
-        INFO: topic .............. $topic
-        INFO: operation .......... $operation
-        INFO: input_data ......... $input_data
-        INFO: input_format ....... $input_format
-        INFO: output_data ........ $output_data
-        INFO: output_format ...... $output_format
-        """
-        */
+
+        // println """
+        // INFO: pipeline ........... $pipeline
+        // INFO: topic .............. $topic
+        // INFO: operation .......... $operation
+        // INFO: input_data ......... $input_data
+        // INFO: input_format ....... $input_format
+        // INFO: output_data ........ $output_data
+        // INFO: output_format ...... $output_format
+        // """
 
         def csvBenchmark = readCsv (benchmarkInfo)
         def benchmarkDict = [:]

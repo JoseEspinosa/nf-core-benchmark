@@ -5,10 +5,8 @@
 */
 
 def valid_params = [
-    protocols   : ['metagenomic', 'amplicon'],
-    callers     : ['ivar', 'bcftools'],
-    assemblers  : ['spades', 'unicycler', 'minia'],
-    spades_modes: ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio']
+    // assemblers  : ['spades', 'unicycler', 'minia'],
+    // spades_modes: ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio']
 ]
 
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
@@ -28,30 +26,19 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
+params.benchmarker = 'bali_score' //TODO hardcoded now
+params.path_to_benchmarker = "${projectDir}/benchmarkers"
+params.benchmarker_path     = "${params.path_to_benchmarker}/${params.benchmarker}" // TODO remove and directly
 
-params.path_to_pipelines = "${projectDir}/pipelines"
-params.pipeline = 'tcoffee' //TODO hardcoded now
-params.pipeline_path     = "${params.path_to_pipelines}/${params.pipeline}" // TODO remove and directly
-pipeline_module = file( "${params.pipeline_path}/main.nf" )
+benchmarker_module = file( "${params.benchmarker_path}/main.nf" )
 
 // TODO adapt to pipeline
 if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
 // TODO define params such as in the case of viralrecon e.g. params.pipeline
 // TODO use variable for name of pipeline i.e. nf-benchmark
-if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not correctly included in nf-benchmark: ${params.pipeline}"
+if( !benchmarker_module.exists() ) exit 1, "ERROR: The selected benchmarker is not correctly included in nf-benchmark: ${benchmarker_module}"
 
 // if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file                   } //delete
-
-
-
-// Pipeline meta-information from the pipeline
-yamlPathPipeline = "${params.pipeline_path}/meta.yml" //TODO check if exists
-csvPathMethods = "${workflow.projectDir}/assets/methods2benchmark.csv"
-pipeline_module = file( "${params.pipeline_path}/main.nf" )
-
-def input_pipeline_param = WorkflowPipeline.setInputParam(yamlPathPipeline)
-
-def infoBenchmark = WorkflowPipeline.setBenchmark(params, yamlPathPipeline, csvPathMethods, params.pipeline, input_pipeline_param)
 
 /*
 ========================================================================================
@@ -92,11 +79,6 @@ def infoBenchmark = WorkflowPipeline.setBenchmark(params, yamlPathPipeline, csvP
 // MODULE: Installed directly from nf-core/modules
 //
 // include { CAT_FASTQ                     } from '../modules/nf-core/software/cat/fastq/main'                     addParams( options: modules['illumina_cat_fastq']                     )
-// include { FASTQC                        } from '../modules/nf-core/software/fastqc/main'                        addParams( options: modules['illumina_cutadapt_fastqc']               )
-// include { KRAKEN2_RUN                   } from '../modules/nf-core/software/kraken2/run/main'                   addParams( options: modules['illumina_kraken2_run']                   )
-// include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['illumina_picard_collectmultiplemetrics'] )
-// include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_genome']               )
-// include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_amplicon']             )
 
 //
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
@@ -104,14 +86,6 @@ def infoBenchmark = WorkflowPipeline.setBenchmark(params, yamlPathPipeline, csvP
 // def fastp_options = modules['illumina_fastp']
 // if (params.save_trimmed_fail) { fastp_options.publish_files.put('fail.fastq.gz','') }
 
-// def bowtie2_align_options = modules['illumina_bowtie2_align']
-// if (params.save_unaligned) { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
-
-// def markduplicates_options   = modules['illumina_picard_markduplicates']
-// markduplicates_options.args += params.filter_duplicates ?  Utils.joinModuleArgs(['REMOVE_DUPLICATES=true']) : ''
-
-// include { FASTQC_FASTP           } from '../subworkflows/nf-core/fastqc_fastp'           addParams( fastqc_raw_options: modules['illumina_fastqc_raw'], fastqc_trim_options: modules['illumina_fastqc_trim'], fastp_options: fastp_options )
-// include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'          addParams( align_options: bowtie2_align_options, samtools_options: modules['illumina_bowtie2_sort_bam']                                           )
 // include { MARK_DUPLICATES_PICARD } from '../subworkflows/nf-core/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['illumina_picard_markduplicates_sort_bam']                   )
 
 /*
@@ -125,19 +99,18 @@ def multiqc_report    = []
 def pass_mapped_reads = [:]
 def fail_mapped_reads = [:]
 
-module_script = WorkflowPipeline.createModuleScript(params.pipeline, workflow, 'pipeline') //#DEL substitute by params.pipeline
+module_script = WorkflowPipeline.createModuleScript(params.benchmarker, workflow, 'benchmarker') //#DEL substitute by params.pipeline
 
-include { RUN_PIPELINE } from "$projectDir/tmp/$module_script"
+include { RUN_BENCHMARKER } from "$projectDir/tmp/$module_script"
 
-workflow PIPELINE {
+workflow BENCHMARKER {
 
-    ch_software_versions = Channel.empty()
+    take:
+    output_pipeline
 
+    // ch_software_versions = Channel.empty()
     main:
-    RUN_PIPELINE ()
-
-    emit:
-    pipeline = RUN_PIPELINE.out
+    RUN_BENCHMARKER (output_pipeline)
 }
 
 /*
