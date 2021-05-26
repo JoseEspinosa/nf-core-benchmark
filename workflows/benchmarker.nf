@@ -111,6 +111,9 @@ workflow BENCHMARKER {
     // ch_software_versions = Channel.empty()
     main:
     RUN_BENCHMARKER (output_pipeline)
+
+    emit:
+    RUN_BENCHMARKER.out
 }
 
 /*
@@ -119,10 +122,10 @@ workflow BENCHMARKER {
 ========================================================================================
 */
 //TODO review according to nfcore/rnaseq
-// workflow.onComplete {
-//     NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
-//     NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
-// }
+workflow.onComplete {
+    NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
+    NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
+}
 
 /*
 ========================================================================================

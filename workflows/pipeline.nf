@@ -146,10 +146,10 @@ workflow PIPELINE {
 ========================================================================================
 */
 //TODO review according to nfcore/rnaseq
-// workflow.onComplete {
-//     NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
-//     NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
-// }
+workflow.onComplete {
+    NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
+    NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
+}
 
 /*
 ========================================================================================
