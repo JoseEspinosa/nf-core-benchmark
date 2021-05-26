@@ -29,6 +29,8 @@ include { PIPELINE }    from './workflows/pipeline' //addParams( summary_params:
 
 params.skip_benchmark = false
 include { BENCHMARKER } from './workflows/benchmarker'
+include { MEAN_SCORE }  from './modules/local/mean_score'
+
 
 workflow  NFCORE_BENCHMARK {
     // include { RUN_PIPELINE } from './dynamic_template/test_pipeline' //addParams( summary_params: summary_params )
@@ -58,17 +60,20 @@ workflow  NFCORE_BENCHMARK {
     //     // """.stripIndent()
 
          BENCHMARKER (PIPELINE.out.pipeline)
-    }
-    //     BENCHMARKER.out \
-    //          | map { it.text } \
-    //          | collectFile (name: 'scores.csv', newLine: false) \
-    //          | set { scores }
+
+        // Move this to benchmarker
+        BENCHMARKER.out \
+             | map { it.text } \
+             | collectFile (name: 'scores.csv', newLine: false) \
+             | set { scores }
+
+        scores.view()
     //     // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
-    //     MEAN_BENCHMARK_SCORE(scores) | view
+        MEAN_SCORE(scores) | view
 
     //     emit:
     //     BENCHMARK.out
-    // }
+    }
 }
 
 workflow {
