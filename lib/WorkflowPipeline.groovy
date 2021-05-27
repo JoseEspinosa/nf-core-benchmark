@@ -93,8 +93,7 @@ class WorkflowPipeline {
         directory.mkdir() // TODO not needed?
         moduleFile.createNewFile()
 
-        // def worflow_dir = { ${workflow_name} == 'pipeline' ? 'pipelines' : ${workflow_name} == 'pipeline'?  }
-        // { task.exitStatus in [143,137,104,134,139] ? 'retry' : 'finish' }
+
         def module_name_upper_case   = module_name.toUpperCase()
         def workflow_name_upper_case = workflow_name.toUpperCase()
         def take_clausure = workflow_name == 'benchmarker' ? 'take: data' : ''

@@ -15,8 +15,6 @@ include { BALI_SCORE as BALI_SCORE_MODULE } from "${moduleDir}/modules/bali_scor
 
 // Set sequences channel
 reference_ch = Channel.fromPath( params.reference, checkIfExists: true ).map { item -> [ item.baseName, item ] }
-// reference_ch = Channel.fromPath( [], checkIfExists: true ).map { item -> [ item.baseName, item ] }
-// reference_ch.view() //del
 
 // Run the workflow
 workflow BALI_SCORE {

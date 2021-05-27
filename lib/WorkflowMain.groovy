@@ -2,6 +2,10 @@
 // This file holds several functions specific to the main.nf workflow in the nf-core/viralrecon pipeline
 //
 
+import org.yaml.snakeyaml.Yaml
+@Grab('com.xlson.groovycsv:groovycsv:1.0')
+import static com.xlson.groovycsv.CsvParser.parseCsv
+
 class WorkflowMain {
 
     //
@@ -140,5 +144,72 @@ class WorkflowMain {
             }
         }
         return val
+    }
+
+    //
+    // Get benchmarker for the pipeline
+    //
+    public static String getBenchmarker(workflow, params, log) {
+        def benchmarker = ''
+
+        if (!params.path_to_pipelines || !params.pipeline) {
+            log.error ("ERROR HERE")//TODO
+        }
+
+        def yaml_file = "${params.path_to_pipelines}/" + "${params.pipeline}/" + 'meta.yml'
+        Yaml parser = new Yaml()
+        def pipeline_meta = parser.load((yaml_file as File).text)
+        def topic = pipeline_meta.pipeline."$params.pipeline".edam_topic[0]
+        def operation = pipeline_meta.pipeline."$params.pipeline".edam_operation[0]
+        def input_field = pipeline_meta.input[0][0].keySet()[0]
+        def input_data = pipeline_meta.input."$input_field".edam_data[0][0] // TODO these are hardcodes for the current example
+        def input_format = pipeline_meta.input."$input_field".edam_format[0][0]
+        def output_data = pipeline_meta.output.alignment.edam_data[0][0]
+        def output_format = pipeline_meta.output.alignment.edam_format[0][0]
+
+        log.info """
+        INFO: pipeline ........... $params.pipeline
+        INFO: topic .............. $topic
+        INFO: operation .......... $operation
+        INFO: input_data ......... $input_data
+        INFO: input_format ....... $input_format
+        INFO: output_data ........ $output_data
+        INFO: output_format ...... $output_format
+        """
+
+        // def csv_file = new File ("${workflow.projectDir}/assets/methods2benchmark.csv")
+        // def csv_benchmark = csv_file.getText('utf-8')
+        def file_csv       = new File("${workflow.projectDir}/assets/methods2benchmark.csv")
+        def csv_benchmark = parseCsv(file_csv.text, autoDetect:true)
+
+        def benchmark_dict = [:]
+        def i = 0
+
+
+        for( row in csv_benchmark ) {
+            if (row.edam_operation     == operation   &&
+                row.edam_input_data    == input_data   &&
+                row.edam_input_format  == input_format &&
+                row.edam_output_data   == output_data  &&
+                row.edam_output_format == output_format ) {
+                    benchmark_dict [ (row.benchmarker_priority) ] = [ benchmarker: row.benchmarker,
+                        operation: row.edam_operation,
+                        input_data: row.edam_input_data,
+                        input_format: row.edam_input_format,
+                        output_data: row.edam_output_data,
+                        output_format: row.edam_output_format ]
+            }
+        }
+
+        def higher_priority = benchmark_dict.keySet().min()
+
+        if ( benchmark_dict.size() == 0 ) exit 1, "Error: No available benchmark for the selected pipeline  \"${params.pipeline}\" is not included in nf-benchmark"
+
+        if ( benchmark_dict.size() > 1 ) {
+            log.info "WARN: More than one possible benchmarker for \"${params.pipeline}\" pipeline benchmarker set to \"${benchmark_dict[higher_priority].benchmarker}\" (higher priority)"
+            benchmark_dict = benchmark_dict [ higher_priority ]
+        }
+
+        return benchmark_dict.benchmarker
     }
 }

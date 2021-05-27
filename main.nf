@@ -13,6 +13,23 @@ nextflow.enable.dsl = 2
 
 /*
 ========================================================================================
+    PIPELINE PARAMETER VALUES
+========================================================================================
+*/
+// "${params.pipeline_path}/meta.yml"
+// params.yaml_pipeline
+// params.csv_methods
+
+/*
+========================================================================================
+    BENCHMARKER PARAMETER VALUES
+========================================================================================
+*/
+
+params.benchmarker = WorkflowMain.getBenchmarker(workflow, params, log)
+
+/*
+========================================================================================
     VALIDATE & PRINT PARAMETER SUMMARY
 ========================================================================================
 */
@@ -29,7 +46,7 @@ include { PIPELINE }    from './workflows/pipeline' //addParams( summary_params:
 
 params.skip_benchmark = false
 include { BENCHMARKER } from './workflows/benchmarker'
-include { MEAN_SCORE }  from './modules/local/mean_score'
+// include { MEAN_SCORE }  from './modules/local/mean_score'
 
 
 workflow  NFCORE_BENCHMARK {
@@ -61,15 +78,7 @@ workflow  NFCORE_BENCHMARK {
 
          BENCHMARKER (PIPELINE.out.pipeline)
 
-        // Move this to benchmarker
-        BENCHMARKER.out \
-             | map { it.text } \
-             | collectFile (name: 'scores.csv', newLine: false) \
-             | set { scores }
-
-        scores.view()
-    //     // TODO: output sometimes could be more than just a single score, refactor to be compatible with these cases
-        MEAN_SCORE(scores) | view
+    //     BENCHMARKER.out | view
 
     //     emit:
     //     BENCHMARK.out

@@ -26,11 +26,8 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
-params.benchmarker = 'bali_score' //TODO hardcoded now
-params.path_to_benchmarker = "${projectDir}/benchmarkers"
-params.benchmarker_path     = "${params.path_to_benchmarker}/${params.benchmarker}" // TODO remove and directly
 
-benchmarker_module = file( "${params.benchmarker_path}/main.nf" )
+benchmarker_module = file( "${params.path_to_benchmarkers}/${params.benchmarker}/main.nf" )
 
 // TODO adapt to pipeline
 if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
@@ -102,6 +99,7 @@ def fail_mapped_reads = [:]
 module_script = WorkflowPipeline.createModuleScript(params.benchmarker, workflow, 'benchmarker') //#DEL substitute by params.pipeline
 
 include { RUN_BENCHMARKER } from "$projectDir/tmp/$module_script"
+include { MEAN_SCORE      } from "$projectDir/modules/local/mean_score"
 
 workflow BENCHMARKER {
 
@@ -112,16 +110,26 @@ workflow BENCHMARKER {
     main:
     RUN_BENCHMARKER (output_pipeline)
 
+    RUN_BENCHMARKER.out \
+        | map { it.text } \
+        | collectFile (name: 'scores.csv', newLine: false) \
+        | set { scores }
+
+    MEAN_SCORE(scores) | view
+
     emit:
-    RUN_BENCHMARKER.out
+    // RUN_BENCHMARKER.out
+    MEAN_SCORE.out
 }
+
 
 /*
 ========================================================================================
     COMPLETION EMAIL AND SUMMARY
 ========================================================================================
 */
-//TODO review according to nfcore/rnaseq
+//TODO review according to nfcore/rnaseq,
+// here is different since both are run!!!
 workflow.onComplete {
     NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
     NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)

@@ -29,10 +29,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
-params.path_to_pipelines = "${projectDir}/pipelines"
-params.pipeline = 'tcoffee' //TODO hardcoded now
-params.pipeline_path     = "${params.path_to_pipelines}/${params.pipeline}" // TODO remove and directly
-pipeline_module = file( "${params.pipeline_path}/main.nf" )
+pipeline_module = file( "${params.path_to_pipelines}/${params.pipeline}/main.nf" )
 
 // TODO adapt to pipeline
 if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
@@ -45,13 +42,13 @@ if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not cor
 
 
 // Pipeline meta-information from the pipeline
-yamlPathPipeline = "${params.pipeline_path}/meta.yml" //TODO check if exists
+yaml_path_pipeline = "${params.path_to_pipelines}/${params.pipeline}/meta.yml" //TODO check if exists
 csvPathMethods = "${workflow.projectDir}/assets/methods2benchmark.csv"
 pipeline_module = file( "${params.pipeline_path}/main.nf" )
 
-def input_pipeline_param = WorkflowPipeline.setInputParam(yamlPathPipeline)
+def input_pipeline_param = WorkflowPipeline.setInputParam(yaml_path_pipeline)
 
-def infoBenchmark = WorkflowPipeline.setBenchmark(params, yamlPathPipeline, csvPathMethods, params.pipeline, input_pipeline_param)
+// def infoBenchmark = WorkflowPipeline.setBenchmark(params, yaml_path_pipeline, csvPathMethods, params.pipeline, input_pipeline_param)
 
 /*
 ========================================================================================
@@ -145,7 +142,8 @@ workflow PIPELINE {
     COMPLETION EMAIL AND SUMMARY
 ========================================================================================
 */
-//TODO review according to nfcore/rnaseq
+//TODO review according to nfcore/rnaseq,
+// here is different since both are run!!!
 workflow.onComplete {
     NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
     NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
