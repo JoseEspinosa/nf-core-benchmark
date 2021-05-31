@@ -27,6 +27,7 @@ nextflow.enable.dsl = 2
 */
 
 params.benchmarker = WorkflowMain.getBenchmarker(workflow, params, log)
+params.skip_benchmark = false
 
 /*
 ========================================================================================
@@ -43,11 +44,9 @@ WorkflowMain.initialise(workflow, params, log)
 */
 
 include { PIPELINE }    from './workflows/pipeline' //addParams( summary_params: summary_params )
-
-params.skip_benchmark = false
 include { BENCHMARKER } from './workflows/benchmarker'
-// include { MEAN_SCORE }  from './modules/local/mean_score'
 
+// include { MEAN_SCORE }  from './modules/local/mean_score'
 
 workflow  NFCORE_BENCHMARK {
     // include { RUN_PIPELINE } from './dynamic_template/test_pipeline' //addParams( summary_params: summary_params )
@@ -76,9 +75,9 @@ workflow  NFCORE_BENCHMARK {
     //     // Benchmark: ${infoBenchmark.benchmarker}
     //     // """.stripIndent()
 
-         BENCHMARKER (PIPELINE.out.pipeline)
+        BENCHMARKER (PIPELINE.out.pipeline)
 
-    //     BENCHMARKER.out | view
+        BENCHMARKER.out | view //del
 
     //     emit:
     //     BENCHMARK.out
