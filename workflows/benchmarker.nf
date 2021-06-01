@@ -17,7 +17,7 @@ WorkflowPipeline.initialise(params, log, valid_params)
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
 def checkPathParamList = [
-    params.input, params.multiqc_config, params.fasta
+    params.input, params.multiqc_config//, params.fasta
     //params.input, params.fasta, params.gff, params.bowtie2_index,
     // params.kraken2_db, params.primer_bed, params.primer_fasta,
     // params.blast_db, params.spades_hmm, params.multiqc_config

@@ -19,7 +19,7 @@ WorkflowPipeline.initialise(params, log, valid_params)
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
 def checkPathParamList = [
-    params.input, params.multiqc_config, params.fasta
+    params.input, params.multiqc_config//, params.fasta
     //params.input, params.fasta, params.gff, params.bowtie2_index,
     // params.kraken2_db, params.primer_bed, params.primer_fasta,
     // params.blast_db, params.spades_hmm, params.multiqc_config
@@ -29,13 +29,17 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
-pipeline_module = file( "${params.path_to_pipelines}/${params.pipeline}/main.nf" )
+// TODO check in workflow initialize??
+
+//pipeline_module = file( "${params.path_to_pipelines}/${params.pipeline}/main.nf" )
 
 // TODO adapt to pipeline
 if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
+
 // TODO define params such as in the case of viralrecon e.g. params.pipeline
 // TODO use variable for name of pipeline i.e. nf-benchmark
-if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not correctly included in nf-benchmark: ${params.pipeline}"
+
+//if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not correctly included in nf-benchmark: ${params.pipeline}"
 
 // if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file                   } //delete
 
@@ -44,7 +48,8 @@ if( !pipeline_module.exists() ) exit 1, "ERROR: The selected pipeline is not cor
 // Pipeline meta-information from the pipeline
 yaml_path_pipeline = "${params.path_to_pipelines}/${params.pipeline}/meta.yml" //TODO check if exists
 csvPathMethods = "${workflow.projectDir}/assets/methods2benchmark.csv"
-pipeline_module = file( "${params.pipeline_path}/main.nf" )
+
+//pipeline_module = file( "${params.pipeline_path}/main.nf" )
 
 def input_pipeline_param = WorkflowPipeline.setInputParam(yaml_path_pipeline)
 
@@ -58,10 +63,6 @@ def input_pipeline_param = WorkflowPipeline.setInputParam(yaml_path_pipeline)
 
 // ch_multiqc_config        = file("$projectDir/assets/multiqc_config_illumina.yaml", checkIfExists: true) //TODO
 // ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
-
-// Header files // TODO add if needed
-// ch_blast_outfmt6_header     = file("$projectDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
-// ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_header_mqc.txt", checkIfExists: true)
 
 /*
 ========================================================================================
@@ -123,6 +124,8 @@ def pass_mapped_reads = [:]
 def fail_mapped_reads = [:]
 
 module_script = WorkflowPipeline.createModuleScript(params.pipeline, workflow, 'pipeline') //#DEL substitute by params.pipeline
+//  Change to get both params.pipeline and params.pipeline_path //TODO
+// module_script = WorkflowPipeline.createModuleScript(params, workflow, 'pipeline') //#DEL substitute by params.pipeline
 
 include { RUN_PIPELINE } from "$projectDir/tmp/$module_script"
 

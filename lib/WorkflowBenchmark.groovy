@@ -10,11 +10,11 @@ class WorkflowNanopore {
     public static void initialise(params, log, valid_params) {
         WorkflowCommons.genomeExistsError(params, log)
 
-        // Generic parameter validation
-        if (!params.fasta) {
-            log.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
-            System.exit(1)
-        }
+        // Generic parameter validation //TODO del
+        // if (!params.fasta) {
+        //     log.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
+        //     System.exit(1)
+        // }
 
         if (!params.primer_bed) {
             log.error "Primer BED file not specified with e.g. '--primer_bed primers.bed' or via a detectable config file."

@@ -83,7 +83,7 @@ class NfcoreTemplate {
         email_fields['projectDir']        = workflow.projectDir
         email_fields['summary']           = summary << misc_fields
         email_fields['fail_mapped_reads'] = fail_mapped_reads.keySet()
-        email_fields['min_mapped_reads']  = params.min_mapped_reads
+        // email_fields['min_mapped_reads']  = params.min_mapped_reads
 
         // On success try attach the multiqc report
         def mqc_report = null
@@ -163,27 +163,27 @@ class NfcoreTemplate {
     public static void summary(workflow, params, log, fail_mapped_reads=[:], pass_mapped_reads=[:]) {
         Map colors = logColours(params.monochrome_logs)
 
-        if (pass_mapped_reads.size() > 0) {
-            def idx = 0
-            def samp_aln = ''
-            def total_aln_count = pass_mapped_reads.size() + fail_mapped_reads.size()
-            for (samp in pass_mapped_reads) {
-                samp_aln += "    ${samp.value}: ${samp.key}\n"
-                idx += 1
-                if (idx > 5) {
-                    samp_aln += "    ..see pipeline reports for full list\n"
-                    break;
-                }
-            }
-            log.info "-${colors.purple}[$workflow.manifest.name]${colors.green} ${pass_mapped_reads.size()}/$total_aln_count samples passed Bowtie2 ${params.min_mapped_reads} mapped read threshold:\n${samp_aln}${colors.reset}-"
-        }
-        if (fail_mapped_reads.size() > 0) {
-            def samp_aln = ''
-            for (samp in fail_mapped_reads) {
-                samp_aln += "    ${samp.value}: ${samp.key}\n"
-            }
-            log.info "-${colors.purple}[$workflow.manifest.name]${colors.red} ${fail_mapped_reads.size()} samples skipped since they failed Bowtie2 ${params.min_mapped_reads} mapped read threshold:\n${samp_aln}${colors.reset}-"
-        }
+        // if (pass_mapped_reads.size() > 0) { //TODO //del
+        //     def idx = 0
+        //     def samp_aln = ''
+        //     def total_aln_count = pass_mapped_reads.size() + fail_mapped_reads.size()
+        //     for (samp in pass_mapped_reads) {
+        //         samp_aln += "    ${samp.value}: ${samp.key}\n"
+        //         idx += 1
+        //         if (idx > 5) {
+        //             samp_aln += "    ..see pipeline reports for full list\n"
+        //             break;
+        //         }
+        //     }
+        //     log.info "-${colors.purple}[$workflow.manifest.name]${colors.green} ${pass_mapped_reads.size()}/$total_aln_count samples passed Bowtie2 ${params.min_mapped_reads} mapped read threshold:\n${samp_aln}${colors.reset}-"
+        // }
+        // if (fail_mapped_reads.size() > 0) { //TODO //del
+        //     def samp_aln = ''
+        //     for (samp in fail_mapped_reads) {
+        //         samp_aln += "    ${samp.value}: ${samp.key}\n"
+        //     }
+        //     log.info "-${colors.purple}[$workflow.manifest.name]${colors.red} ${fail_mapped_reads.size()} samples skipped since they failed Bowtie2 ${params.min_mapped_reads} mapped read threshold:\n${samp_aln}${colors.reset}-"
+        // }
 
         if (workflow.success) {
             if (workflow.stats.ignoredCount == 0) {
