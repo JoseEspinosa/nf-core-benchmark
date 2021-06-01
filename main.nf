@@ -1,15 +1,24 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-                         nf-core/benchmark
+    nf-core/benchmark
 ========================================================================================
- nf-core/benchmark Analysis Pipeline.
- #### Homepage / Documentation
- https://github.com/nf-core/benchmark
+    nf-core/benchmark Analysis Pipeline.
+    #### Homepage / Documentation
+    https://github.com/nf-core/benchmark
 ----------------------------------------------------------------------------------------
 */
 
 nextflow.enable.dsl = 2
+
+/*
+========================================================================================
+    WORKFLOW VALUES
+========================================================================================
+*/
+
+def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
+def multiqc_report = []
 
 /*
 ========================================================================================
@@ -26,7 +35,7 @@ params.pipeline_path = "${params.pipelines_dir}/${params.pipeline}/main.nf"
 */
 
 params.skip_benchmark   = false
-params.benchmarker      = WorkflowMain.getBenchmarker(workflow, params, log) // si se saca con la funcion tiene que ser parametro tb?
+params.benchmarker      = WorkflowMain.getBenchmarker(workflow, params, log)
 params.benchmarker_path = "${params.benchmarkers_dir}/${params.benchmarker}/main.nf"
 
 /*
@@ -57,6 +66,17 @@ workflow  NFCORE_BENCHMARK {
 
 workflow {
     NFCORE_BENCHMARK ()
+}
+
+/*
+========================================================================================
+    COMPLETION EMAIL AND SUMMARY
+========================================================================================
+*/
+
+workflow.onComplete {
+    NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
+    NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
 }
 
 /*
