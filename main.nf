@@ -16,9 +16,8 @@ nextflow.enable.dsl = 2
     PIPELINE PARAMETER VALUES
 ========================================================================================
 */
-// "${params.pipeline_path}/meta.yml"
-// params.yaml_pipeline
-// params.csv_methods
+
+params.pipeline_path = "${params.pipelines_dir}/${params.pipeline}/main.nf"
 
 /*
 ========================================================================================
@@ -26,8 +25,9 @@ nextflow.enable.dsl = 2
 ========================================================================================
 */
 
-params.benchmarker = WorkflowMain.getBenchmarker(workflow, params, log)
-params.skip_benchmark = false
+params.skip_benchmark   = false
+params.benchmarker      = WorkflowMain.getBenchmarker(workflow, params, log) // si se saca con la funcion tiene que ser parametro tb?
+params.benchmarker_path = "${params.benchmarkers_dir}/${params.benchmarker}/main.nf"
 
 /*
 ========================================================================================

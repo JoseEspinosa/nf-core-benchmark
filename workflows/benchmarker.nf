@@ -17,17 +17,14 @@ WorkflowPipeline.initialise(params, log, valid_params)
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
 def checkPathParamList = [
-    params.input, params.multiqc_config//, params.fasta
-    //params.input, params.fasta, params.gff, params.bowtie2_index,
-    // params.kraken2_db, params.primer_bed, params.primer_fasta,
-    // params.blast_db, params.spades_hmm, params.multiqc_config
+    params.input, params.benchmarker_path, params.multiqc_config
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
-benchmarker_module = file( "${params.path_to_benchmarkers}/${params.benchmarker}/main.nf" )
+benchmarker_module = file( "${params.benchmarkers_dir}/${params.benchmarker}/main.nf" )
 
 // TODO adapt to pipeline
 if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }

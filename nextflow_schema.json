@@ -41,11 +41,11 @@
             "fa_icon": "fas fa-wrench",
             "description": "Options for the pipeline workflow.",
             "properties": {
-                "path_to_pipelines":{
+                "pipelines_dir":{
                     "type": "string",
                     "format": "directory-path",
-                    "description": "Path to a folder containing pipeline.",
-                    "help_text": "e.g. '--path_to_pipelines ./pipelines/'.",
+                    "description": "Path to a directory containing pipeline.",
+                    "help_text": "e.g. '--pipelines_dir ./path_to_pipelines/'.",
                     "fa_icon": "fas fa-folder-open"
                 },
                 "pipeline": {
@@ -53,6 +53,11 @@
                     "fa_icon": "fas fa-file-code",
                     "description": "Pipeline workflow name.",
                     "help_text": "Name of the workflow running the pipeline."
+                },
+                "pipeline_path": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "description": "Path to the pipeline main Nextflow script."
                 }
             }
         },
@@ -62,11 +67,11 @@
             "fa_icon": "fas fa-wrench",
             "description": "Options for the benchmarker workflow.",
             "properties": {
-                "path_to_benchmarkers":{
+                "benchmarkers_dir":{
                     "type": "string",
                     "format": "directory-path",
-                    "description": "Path to a folder containing benchmarker.",
-                    "help_text": "e.g. '--path_to_benchmarkers ./benchmarkers/'.",
+                    "description": "Path to a directory containing benchmarker.",
+                    "help_text": "e.g. '--benchmarkers_dir ./path_to_benchmarkers'.",
                     "fa_icon": "fas fa-folder-open"
                 },
                 "benchmarker": {
@@ -74,6 +79,11 @@
                     "fa_icon": "fas fa-file-code",
                     "description": "Benchmarker workflow name.",
                     "help_text": "Name of the workflow running the benchmarker."
+                },
+                "benchmarker_path": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "description": "Path to the benchmarker main Nextflow script."
                 },
                 "skip_benchmark": {
                     "type": "boolean",

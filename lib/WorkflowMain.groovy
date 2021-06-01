@@ -74,19 +74,6 @@ class WorkflowMain {
 
         // Check the hostnames against configured profiles
         NfcoreTemplate.hostName(workflow, params, log)
-
-        // #DELETE
-        // Check sequencing platform
-        // def platformList = ['illumina', 'nanopore']
-        // if (!params.public_data_ids) {
-        //     if (!params.platform) {
-        //         log.error "Platform not specified with e.g. '--platform illumina'. Valid options: ${platformList.join(', ')}."
-        //         System.exit(1)
-        //     } else if (!platformList.contains(params.platform)) {
-        //         log.error "Invalid platform option: '${params.platform}'. Valid options: ${platformList.join(', ')}."
-        //         System.exit(1)
-        //     }
-        // }
     }
 
     //
@@ -152,11 +139,7 @@ class WorkflowMain {
     public static String getBenchmarker(workflow, params, log) {
         def benchmarker = ''
 
-        if (!params.path_to_pipelines || !params.pipeline) {
-            log.error ("ERROR HERE")//TODO
-        }
-
-        def yaml_file = "${params.path_to_pipelines}/" + "${params.pipeline}/" + 'meta.yml'
+        def yaml_file = "${params.pipelines_dir}/" + "${params.pipeline}/" + 'meta.yml'
         Yaml parser = new Yaml()
         def pipeline_meta = parser.load((yaml_file as File).text)
         def topic = pipeline_meta.pipeline."$params.pipeline".edam_topic[0]
