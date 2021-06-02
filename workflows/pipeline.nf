@@ -72,9 +72,9 @@ def multiqc_report    = []
 def pass_mapped_reads = [:]
 def fail_mapped_reads = [:]
 
-module_script = WorkflowPipeline.createModuleScript(params.pipeline, workflow, 'pipeline') //#DEL substitute by params.pipeline
+module_script = WorkflowCommons.createModuleScript(params, workflow, log, 'pipeline') //#DEL substitute by params.pipeline
 //  Change to get both params.pipeline and params.pipeline_path //TODO
-// module_script = WorkflowPipeline.createModuleScript(params, workflow, 'pipeline') //#DEL substitute by params.pipeline
+// module_script = WorkflowCommons.createModuleScript(params, workflow, 'pipeline') //#DEL substitute by params.pipeline
 
 include { RUN_PIPELINE } from "$projectDir/tmp/$module_script"
 

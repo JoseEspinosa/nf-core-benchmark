@@ -95,4 +95,67 @@ class WorkflowCommons {
         }
         return num_vars
     }
+        // Function to dynamically create a nextflow script to run the pipeline/benchmarker
+    //  module_name = baliscore params.pipeline
+    //  workflow_name = benchmarker
+    // TODO use params instead
+    public static String createModuleScript(params, workflow, log, workflow_name) {
+
+        // TODO Check if exists
+        // Delete if exists
+        // Should be placed in the same folder as the original main.nf otherwise nextflow.config won't be read
+        // Not even, this should be control from the main nf-core-benchmark
+        def module_name              = workflow_name == 'pipeline' ? params.pipeline : params.benchmarker
+        // TODO do not check for name but for changed path like in nextflow!!!
+        def md5                      = module_name.md5().toString().substring(0,6)
+        def file_name                = "main_${md5}.nf"
+        def module_dir               = new File("${workflow.projectDir}/tmp/") //TODO make a param
+        def module_file              = new File("${workflow.projectDir}/tmp/" + file_name)
+        def module_name_upper_case   = module_name.toUpperCase()
+        def workflow_name_upper_case = workflow_name.toUpperCase()
+        def take_clausure            = workflow_name == 'benchmarker' ? 'take: data' : ''
+        def run_clausure             = workflow_name == 'benchmarker' ? module_name_upper_case + '(data)' : module_name_upper_case + '()'
+
+        if (!module_dir.exists()) {
+            if (!module_dir.mkdirs()) {
+                log.error "=============================================================================\n" +
+                "  Failed to create include module directory: '${module_dir}'\n" +
+                "  Make sure you have write permission.\n"
+                "==================================================================================="
+                System.exit(1)
+            }
+        }
+
+        module_file.createNewFile()
+
+        module_file.text = """\
+        #!/usr/bin/env nextflow
+
+        nextflow.enable.dsl=2
+
+        include { ${module_name_upper_case} } from "../${workflow_name}s/${module_name}/main.nf"
+
+        workflow RUN_${workflow_name_upper_case} {
+            ${take_clausure}
+            main:
+            ${run_clausure}
+
+            emit:
+            ${workflow_name} = ${module_name_upper_case}.out
+        }
+
+        workflow {
+            RUN_${workflow_name_upper_case}()
+        }
+        """.stripIndent()
+
+        while (!module_file.exists()) {
+            sleep(1)
+        }
+
+        //execute permission
+        "chmod +x $module_file".execute()
+
+        return file_name
+    }
 }
