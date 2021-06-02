@@ -23,10 +23,6 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("${projectDir}/assets/dummy_file.txt", checkIfExists: true)
 
-// Pipeline meta-information from the pipeline
-// yaml_path_pipeline = "${params.pipelines_dir}/${params.pipeline}/meta.yml" //TODO check if exists parametrize!!
-// csvPathMethods = "${workflow.projectDir}/assets/methods2benchmark.csv" //TODO parametrize!! ADD TO CHECK PARAMLIST
-
 /*
 ========================================================================================
     CONFIG FILES
@@ -72,9 +68,7 @@ def multiqc_report    = []
 def pass_mapped_reads = [:]
 def fail_mapped_reads = [:]
 
-module_script = WorkflowCommons.createModuleScript(params, workflow, log, 'pipeline') //#DEL substitute by params.pipeline
-//  Change to get both params.pipeline and params.pipeline_path //TODO
-// module_script = WorkflowCommons.createModuleScript(params, workflow, 'pipeline') //#DEL substitute by params.pipeline
+module_script = WorkflowCommons.createModuleScript(params, workflow, log, 'pipeline')
 
 include { RUN_PIPELINE } from "${params.benchmark_work}/${module_script}"
 

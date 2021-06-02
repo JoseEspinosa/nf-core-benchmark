@@ -99,9 +99,6 @@ class WorkflowCommons {
     //
     // Function to dynamically create a nextflow script to run the pipeline/benchmarker
     //
-    //  module_name = baliscore params.pipeline
-    //  workflow_name = benchmarker
-    // TODO use params instead
     public static String createModuleScript(params, workflow, log, workflow_name) {
         // TODO Check if exists
         // Delete if exists

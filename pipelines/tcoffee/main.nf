@@ -19,8 +19,6 @@ log.info """\
     """
     .stripIndent()
 
-// println "====================================== $params.sequences\n======================================"
-
 // Set sequences channel
 sequences_ch = Channel.fromPath( params.sequences, checkIfExists: true ).map { item -> [ item.baseName, item ] }
 
