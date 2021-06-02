@@ -66,8 +66,8 @@ def fail_mapped_reads = [:]
 // TODO this should be rename to WorkflowCommons or something
 module_script = WorkflowCommons.createModuleScript(params, workflow, log, 'benchmarker') //#DEL substitute by params.pipeline
 
-include { RUN_BENCHMARKER } from "$projectDir/tmp/$module_script"
-include { MEAN_SCORE      } from "$projectDir/modules/local/mean_score"
+include { RUN_BENCHMARKER } from "${params.benchmark_work}/${module_script}"
+include { MEAN_SCORE      } from "${projectDir}/modules/local/mean_score"
 
 workflow BENCHMARKER {
 

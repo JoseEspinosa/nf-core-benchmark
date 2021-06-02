@@ -75,6 +75,12 @@ class WorkflowMain {
 
         // Check the hostnames against configured profiles
         NfcoreTemplate.hostName(workflow, params, log)
+
+        // Check that working directory is set
+        if (!params.benchmark_work) {
+            log.error "A directory should be set to place nf-core-benchmark working files. You could specify it with e.g. '--benchmark_work /your/path'."
+            System.exit(1)
+        }
     }
 
     //
