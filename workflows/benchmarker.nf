@@ -14,25 +14,14 @@ def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 // Validate input parameters
 WorkflowPipeline.initialise(params, log, valid_params)
 
-// TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
 def checkPathParamList = [
-    params.input, params.benchmarker_path, params.multiqc_config
+    params.benchmarker_path, params.multiqc_config
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
-
-benchmarker_module = file( "${params.benchmarkers_dir}/${params.benchmarker}/main.nf" )
-
-// TODO adapt to pipeline
-if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
-// TODO define params such as in the case of viralrecon e.g. params.pipeline
-// TODO use variable for name of pipeline i.e. nf-benchmark
-if( !benchmarker_module.exists() ) exit 1, "ERROR: The selected benchmarker is not correctly included in nf-benchmark: ${benchmarker_module}"
-
-// if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file                   } //delete
 
 /*
 ========================================================================================
@@ -43,10 +32,6 @@ if( !benchmarker_module.exists() ) exit 1, "ERROR: The selected benchmarker is n
 // ch_multiqc_config        = file("$projectDir/assets/multiqc_config_illumina.yaml", checkIfExists: true) //TODO
 // ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
 
-// Header files // TODO add if needed
-// ch_blast_outfmt6_header     = file("$projectDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
-// ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_header_mqc.txt", checkIfExists: true)
-
 /*
 ========================================================================================
     IMPORT LOCAL MODULES/SUBWORKFLOWS
@@ -54,9 +39,6 @@ if( !benchmarker_module.exists() ) exit 1, "ERROR: The selected benchmarker is n
 */
 
 // Don't overwrite global params.modules, create a copy instead and use that within the main script.
-
-// include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] )
-
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -69,18 +51,6 @@ if( !benchmarker_module.exists() ) exit 1, "ERROR: The selected benchmarker is n
 ========================================================================================
 */
 
-//
-// MODULE: Installed directly from nf-core/modules
-//
-// include { CAT_FASTQ                     } from '../modules/nf-core/software/cat/fastq/main'                     addParams( options: modules['illumina_cat_fastq']                     )
-
-//
-// SUBWORKFLOW: Consisting entirely of nf-core/modules
-//
-// def fastp_options = modules['illumina_fastp']
-// if (params.save_trimmed_fail) { fastp_options.publish_files.put('fail.fastq.gz','') }
-
-// include { MARK_DUPLICATES_PICARD } from '../subworkflows/nf-core/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['illumina_picard_markduplicates_sort_bam']                   )
 
 /*
 ========================================================================================
@@ -93,6 +63,7 @@ def multiqc_report    = []
 def pass_mapped_reads = [:]
 def fail_mapped_reads = [:]
 
+// TODO this should be rename to WorkflowCommons or something
 module_script = WorkflowPipeline.createModuleScript(params.benchmarker, workflow, 'benchmarker') //#DEL substitute by params.pipeline
 
 include { RUN_BENCHMARKER } from "$projectDir/tmp/$module_script"

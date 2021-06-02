@@ -1,5 +1,5 @@
 //
-// This file holds several functions specific to the workflow/nanopore.nf in the nf-core/viralrecon pipeline
+// This file holds several functions specific to the workflow/pipeline.nf in the nf-core/benchmark pipeline
 //
 
 import org.yaml.snakeyaml.Yaml
@@ -33,6 +33,7 @@ class WorkflowPipeline {
     // Function to dynamically create a nextflow script to run the pipeline/benchmarker
     //  module_name = baliscore
     //  workflow_name = benchmarker
+    // TODO use params instead
     public static String createModuleScript (module_name, workflow, workflow_name) {
         // Check if exists
         // Delete if exists
@@ -82,8 +83,6 @@ class WorkflowPipeline {
 
         //execute permission
         "chmod +x $moduleFile".execute()
-        // done
-        // println "+ Nextflow package `CORE` copied to: $releaseDir\n"
 
         return file_name
     }
@@ -129,6 +128,7 @@ class WorkflowPipeline {
     // benchmarkInfo currently is a CSV but could become a DBs or something else
     public static setBenchmark (params, configYmlFile, benchmarkInfo, pipeline, input_field) {
 
+        // TODO: colors exists as an object
         // Map colors = [:]
         // c_yellow = "\033[0;32m"
         // c_green = params.monochrome_logs ? '' : "\033[0;32m";
@@ -148,10 +148,6 @@ class WorkflowPipeline {
         // colors['red']         = "\033[1;91m"
 
         //TODO check that configYmlFile exists here or outside
-
-        // println "CHIVATO=== configYmlFile =========== $configYmlFile" //delete
-        // System.exit(1)
-
         def fileYml = new File(configYmlFile)
         def yaml = new Yaml() //TODO change to use function readYml
         def pipelineConfig = yaml.load(fileYml.text)
@@ -231,24 +227,6 @@ class WorkflowPipeline {
                 input_param = it.key
             }
         }
-
-        // println "CHIVATO=== input_param =========== $input_param" //delete
         return input_param
     }
-
-    // public static ArrayList getFlagstatMappedReads(flagstat_file, params) {
-    //     def mapped_reads = 0
-    //     flagstat_file.eachLine { line ->
-    //         if (line.contains(' mapped (')) {
-    //             mapped_reads = line.tokenize().first().toInteger()
-    //         }
-    //     }
-
-    //     def pass = false
-    //     def logname = flagstat_file.getBaseName() - 'flagstat'
-    //     if (mapped_reads > params.min_mapped_reads.toInteger()) {
-    //         pass = true
-    //     }
-    //     return [ mapped_reads, pass ]
-    // }
 }

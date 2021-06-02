@@ -1,5 +1,5 @@
 //
-// This file holds several functions specific to the workflow/nanopore.nf in the nf-core/viralrecon pipeline
+// This file holds several functions specific to the workflow/benchmark.nf in the nf-core/benchmark pipeline
 //
 
 class WorkflowBenchmark {
