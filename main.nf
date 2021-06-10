@@ -37,7 +37,7 @@ params.pipeline_path = "${params.pipelines_dir}/${params.pipeline}/main.nf"
 params.skip_benchmark   = false
 
 if (!params.skip_benchmark) {
-    params.benchmarker      = WorkflowMain.getBenchmarker(workflow, params, log)
+    params.benchmarker      = WorkflowMainNfcoreBench.getBenchmarker(workflow, params, log)
     params.benchmarker_path = "${params.benchmarkers_dir}/${params.benchmarker}/main.nf"
 }
 
@@ -47,7 +47,7 @@ if (!params.skip_benchmark) {
 ========================================================================================
 */
 
-WorkflowMain.initialise(workflow, params, log)
+WorkflowMainNfcoreBench.initialise(workflow, params, log)
 
 /*
 ========================================================================================
@@ -56,7 +56,10 @@ WorkflowMain.initialise(workflow, params, log)
 */
 
 include { PIPELINE }    from './workflows/pipeline' //addParams( summary_params: summary_params )
-include { BENCHMARKER } from './workflows/benchmarker'
+
+if (!params.skip_benchmark) {
+    include { BENCHMARKER } from './workflows/benchmarker'
+}
 
 workflow  NFCORE_BENCHMARK {
 

@@ -63,7 +63,10 @@ def multiqc_report    = []
 def pass_mapped_reads = [:]
 def fail_mapped_reads = [:]
 
-module_script = WorkflowCommons.createModuleScript(params, workflow, log, 'benchmarker')
+params.workflow_name = 'BALI_SCORE'
+// params.benchmarker_name = 'bali_score'
+
+module_script = WorkflowCommons.createModuleScript(params, workflow, log, 'benchmarker', params.workflow_name, params.benchmarker)
 
 include { RUN_BENCHMARKER } from "${params.benchmark_work}/${module_script}"
 include { MEAN_SCORE      } from "${projectDir}/modules/local/mean_score"
