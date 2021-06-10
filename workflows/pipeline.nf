@@ -68,7 +68,9 @@ def multiqc_report    = []
 def pass_mapped_reads = [:]
 def fail_mapped_reads = [:]
 
-module_script = WorkflowCommons.createModuleScript(params, workflow, log, 'pipeline')
+// params.workflow_name = 'NFCORE_VIRALRECON'
+// params.pipeline_name = 'viralrecon'
+module_script = WorkflowCommons.createModuleScript(params, workflow, log, 'pipeline', params.pipeline, params.pipeline_workflow_name)
 
 include { RUN_PIPELINE } from "${params.benchmark_work}/${module_script}"
 
@@ -79,8 +81,8 @@ workflow PIPELINE {
     main:
     RUN_PIPELINE ()
 
-    emit:
-    pipeline = RUN_PIPELINE.out
+    // emit:
+    // pipeline = RUN_PIPELINE.out
 }
 
 /*

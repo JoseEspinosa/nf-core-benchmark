@@ -52,7 +52,7 @@ On release, automated continuous integration tests run the pipeline on a full-si
     <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
 
     ```bash
-    nextflow run nf-core/benchmark -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.csv --genome GRCh37
+    nextflow run nf-core/benchmark -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --pipeline tcoffee --benchmarker bali_score
     ```
 
 See [usage docs](https://nf-co.re/benchmark/usage) for all of the available options when running the pipeline.

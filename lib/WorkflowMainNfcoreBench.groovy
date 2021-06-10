@@ -6,7 +6,29 @@ import org.yaml.snakeyaml.Yaml
 @Grab('com.xlson.groovycsv:groovycsv:1.0')
 import static com.xlson.groovycsv.CsvParser.parseCsv
 
-class WorkflowMain {
+class WorkflowMainNfcoreBench {
+
+    // public static void get_pipeline_lib (workflow, pipelines_lib_dir, benchmarker_lib_dir) {
+
+    //     def dirs = ["${workflow.projectDir}/lib"]
+    //     println "\n\n\n...................................$dirs"
+    //     def dir = new File(pipelines_lib_dir)
+
+    //     dir.eachDirRecurse () { file ->
+    //         //dirs << file
+    //         //println file.toString().getClass()
+    //         if (file.toString() =~ /$pipelines_lib_dir\/.*\/lib/) {
+    //             // println file.toString()
+    //             dirs << file.toString()
+    //         }
+    //         if (file.toString() =~ /$benchmarker_lib_dir\/.*\/lib/) {
+    //             // println file.toString()
+    //             dirs << file.toString()
+    //         }
+    //     }
+    //     def libs = dirs.join(':')
+    //     println "Lib Dir =====+++++++++++******************** ${libs}"
+    // }
 
     //
     // Citation string for pipeline

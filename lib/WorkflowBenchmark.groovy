@@ -20,10 +20,18 @@ class WorkflowBenchmark {
             System.exit(1)
         }
 
+        // if (params.params.benchmarker_dir && params.benchmarker) {
+        //         if (!params.benchmarker_path) {
+
+        //         }
+        // }
+
         def main_script = 'main.nf'
         def benchmarker_main = "${params.benchmarker_dir}/${params.benchmarker}/" + main_script
         if (params.benchmarker_path != benchmarker_main) {
-            log.warn "\n* params.benchmarker_path has been set to a different path than the resolved using params.benchmarker_dir and params.benchmarker\n"
+            log.warn "\n* params.benchmarker_path has been set to a different path than the resolved using params.benchmarker_dir and params.benchmarker\n" +
+                "* params.benchmarker_path   = ${params.benchmarker_path}\n" +
+                "* benchmarker resolved path = ${benchmarker_main}")
         }
     }
 }
