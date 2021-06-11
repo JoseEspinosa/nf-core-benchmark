@@ -136,11 +136,12 @@ class WorkflowCommons {
 
         workflow RUN_${workflow_type_upper_case} {
             ${take_clausure}
+
             main:
             ${run_clausure}
 
             emit:
-            ${workflow_type} = ${workflow_name_upper_case}
+            ${workflow_type} = ${workflow_name_upper_case}.out
         }
 
         workflow {

@@ -81,8 +81,8 @@ workflow PIPELINE {
     main:
     RUN_PIPELINE ()
 
-    // emit:
-    // pipeline = RUN_PIPELINE.out
+    emit:
+    pipeline = RUN_PIPELINE.out
 }
 
 /*
