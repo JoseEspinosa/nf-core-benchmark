@@ -63,7 +63,7 @@ def multiqc_report    = []
 def pass_mapped_reads = [:]
 def fail_mapped_reads = [:]
 
-params.workflow_name = 'BALI_SCORE'
+params.workflow_name = 'bali_score'
 // params.benchmarker_name = 'bali_score'
 
 module_script = WorkflowCommons.createModuleScript(params, workflow, log, 'benchmarker', params.workflow_name, params.benchmarker)
