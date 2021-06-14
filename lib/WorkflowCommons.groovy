@@ -106,6 +106,8 @@ class WorkflowCommons {
         // Not even, this should be control from the main nf-core-benchmark
         // def module_name              = workflow_type == 'pipeline' ? params.pipeline : params.benchmarker
         // TODO do not check for name but for changed path like in nextflow!!!
+        // TODO parametrize everything and don't assume any uppercase (this will be nf-core compliant but might not
+        // useful for workflows outside nf-core) At least, rethink and document
         def md5                      = workflow_name.md5().toString().substring(0,6)
         def file_name                = "main_${md5}.nf"
         def module_dir               = new File("${params.benchmark_work}")

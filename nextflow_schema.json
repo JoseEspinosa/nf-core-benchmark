@@ -11,6 +11,15 @@
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
             "properties": {
+                "input": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/csv",
+                    "pattern": "\\.csv$",
+                    "schema": "assets/schema_input.json",
+                    "fa_icon": "fas fa-file-csv",
+                    "description": "File containing ???."
+                },
                 "benchmark_work": {
                     "type": "string",
                     "description": "Path to the work directory of nf-core-benchmark.",
@@ -296,6 +305,9 @@
     "allOf": [
         {
             "$ref": "#/definitions/input_output_options"
+        },
+        {
+            "$ref": "#/definitions/pipeline_options"
         },
         {
             "$ref": "#/definitions/benchmarker_options"
