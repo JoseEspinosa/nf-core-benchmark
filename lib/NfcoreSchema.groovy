@@ -121,7 +121,8 @@ class NfcoreSchema {
             def params_ignore = params.schema_ignore_params.split(',') + 'schema_ignore_params'
             def expectedParamsLowerCase = expectedParams.collect{ it.replace("-", "").toLowerCase() }
             def specifiedParamLowerCase = specifiedParam.replace("-", "").toLowerCase()
-            if (!expectedParams.contains(specifiedParam) && !params_ignore.contains(specifiedParam) && !expectedParamsLowerCase.contains(specifiedParamLowerCase)) {
+            def isCamelCaseBug = (specifiedParam.contains("-") && !expectedParams.contains(specifiedParam) && expectedParamsLowerCase.contains(specifiedParamLowerCase))
+            if (!expectedParams.contains(specifiedParam) && !params_ignore.contains(specifiedParam) && !isCamelCaseBug) {
                 // Temporarily remove camelCase/camel-case params #1035
                 def unexpectedParamsLowerCase = unexpectedParams.collect{ it.replace("-", "").toLowerCase()}
                 if (!unexpectedParamsLowerCase.contains(specifiedParamLowerCase)){
@@ -452,28 +453,28 @@ class NfcoreSchema {
         def Map schema_definitions = (Map) new JsonSlurper().parseText(json).get('definitions')
         def Map schema_properties = (Map) new JsonSlurper().parseText(json).get('properties')
         /* Tree looks like this in nf-core schema
-         * definitions <- this is what the first get('definitions') gets us
-            group 1
-                title
-                description
-                    properties
-                    parameter 1
-                        type
-                        description
-                    parameter 2
-                        type
-                        description
-            group 2
-                title
-                description
-                    properties
-                    parameter 1
-                        type
-                        description
-         * properties <- parameters can also be ungrouped, outside of definitions
-            parameter 1
-                type
-                description
+        * definitions <- this is what the first get('definitions') gets us
+                group 1
+                    title
+                    description
+                        properties
+                        parameter 1
+                            type
+                            description
+                        parameter 2
+                            type
+                            description
+                group 2
+                    title
+                    description
+                        properties
+                        parameter 1
+                            type
+                            description
+        * properties <- parameters can also be ungrouped, outside of definitions
+                parameter 1
+                    type
+                    description
         */
 
         // Grouped params
