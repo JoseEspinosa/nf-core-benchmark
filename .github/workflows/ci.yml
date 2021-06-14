@@ -13,7 +13,7 @@ jobs:
     name: Run workflow tests
     # Only run on push if this is the nf-core dev branch (merged PRs)
     # TODO uncomment if published on nf-core
-    # if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/benchmark') }}
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/benchmark') }}
     runs-on: ubuntu-latest
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: [21.03.0-edge]
+        nxf_ver: ['21.04.0', '']
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -39,3 +39,34 @@ jobs:
         # Remember that you can parallelise this by using strategy.matrix
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker
+
+  # test_viralrecon:
+  #   name: Test viralrecon in nf-core-benchmark
+  #   # Only run on push if this is the nf-core dev branch (merged PRs)
+  #   # TODO uncomment if published on nf-core
+  #   # if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/benchmark') }}
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     NXF_VER: ${{ matrix.nxf_ver }}
+  #     NXF_ANSI_LOG: false
+  #   strategy:
+  #     matrix:
+  #       parameters: [--skip_sra_fastq_download, ""]
+
+  #   steps:
+  #     - name: Check out pipeline code
+  #       uses: actions/checkout@v2
+
+  #     - name: Install Nextflow
+  #       env:
+  #         CAPSULE_LOG: none
+  #       run: |
+  #         wget -qO- get.nextflow.io | bash
+  #         sudo mv nextflow /usr/local/bin/
+
+  #     - name: Run pipeline with test data
+  #       # TODO nf-core: You can customise CI pipeline run tests as required
+  #       # For example: adding multiple test runs with different parameters
+  #       # Remember that you can parallelise this by using strategy.matrix
+  #       run: |
+  #         nextflow run ${GITHUB_WORKSPACE} -profile test,docker
