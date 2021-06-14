@@ -2,8 +2,8 @@ name: nf-core CI
 # This workflow runs the pipeline with the minimal test dataset to check that it completes without any syntax errors
 on:
   push:
-    branches:
-      - dev
+    # branches:
+    #   - dev
   pull_request:
   release:
     types: [published]
@@ -13,7 +13,7 @@ jobs:
     name: Run workflow tests
     # Only run on push if this is the nf-core dev branch (merged PRs)
     # TODO uncomment if published on nf-core
-    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/benchmark') }}
+    # if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/benchmark') }}
     runs-on: ubuntu-latest
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
