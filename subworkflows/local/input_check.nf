@@ -9,7 +9,7 @@ include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check' addPa
 workflow INPUT_CHECK {
     take:
     samplesheet // file: /path/to/samplesheet.csv
-    
+
     main:
     SAMPLESHEET_CHECK ( samplesheet )
         .splitCsv ( header:true, sep:',' )
@@ -38,5 +38,5 @@ def get_sample_info(LinkedHashMap row) {
         }
         array = [ meta, [ file(row.fastq_1), file(row.fastq_2) ] ]
     }
-    return array    
+    return array
 }

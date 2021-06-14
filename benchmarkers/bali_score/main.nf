@@ -24,12 +24,12 @@ workflow BALI_SCORE {
     main:
     target_aln
     .join ( reference_ch, by: [0] )
-      .ifEmpty { error "Cannot find any reference matching alignment for benchmarking" }
-      .set { target_and_ref }
+        .ifEmpty { error "Cannot find any reference matching alignment for benchmarking" }
+        .set { target_and_ref }
 
     // REFORMAT_TO_BENCHMARK (target_and_ref)
     REFORMAT_TO_BALI_SCORE (target_and_ref)  \
-      | BALI_SCORE_MODULE
+        | BALI_SCORE_MODULE
 
     emit:
     BALI_SCORE_MODULE.out
@@ -37,5 +37,5 @@ workflow BALI_SCORE {
 }
 
 workflow {
-  BALI_SCORE()
+    BALI_SCORE()
 }
