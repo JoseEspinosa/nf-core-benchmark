@@ -112,8 +112,9 @@ class WorkflowCommons {
         def module_file              = new File("${params.benchmark_work}/" + file_name)
         def workflow_name_upper_case = workflow_name.toUpperCase()
         def workflow_type_upper_case = workflow_type.toUpperCase()
-        def take_clausure            = workflow_type == 'benchmarker' ? 'take: data' : ''
-        def run_clausure             = workflow_type == 'benchmarker' ? workflow_name_upper_case + '(data)' : workflow_name_upper_case + '()'
+        def take_declaration         = workflow_type == 'benchmarker' ? 'take: data' : ''
+        def run_declaration          = workflow_type == 'benchmarker' ? workflow_name_upper_case + '(data)' : workflow_name_upper_case + '()'
+        def emit_declaration         = params.skip_emit && workflow_type == 'pipeline' ? "\"dummy\"" : "${workflow_name_upper_case}.out\n"
 
         if (!module_dir.exists()) {
             if (!module_dir.mkdirs()) {
@@ -135,13 +136,13 @@ class WorkflowCommons {
         include { ${workflow_name_upper_case} } from "${workflow.projectDir}/${workflow_type}s/${module_name}/main.nf"
 
         workflow RUN_${workflow_type_upper_case} {
-            ${take_clausure}
+            ${take_declaration}
 
             main:
-            ${run_clausure}
+            ${run_declaration}
 
             emit:
-            ${workflow_type} = ${workflow_name_upper_case}.out
+            ${workflow_type} = ${emit_declaration}
         }
 
         workflow {
