@@ -2,6 +2,7 @@ name: nf-core CI
 # This workflow runs the pipeline with the minimal test dataset to check that it completes without any syntax errors
 on:
   push:
+    # TODO uncomment if published on nf-core
     # branches:
     #   - dev
   pull_request:
