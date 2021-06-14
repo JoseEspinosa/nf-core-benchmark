@@ -1,3 +1,0 @@
-[submodule "pipelines/viralrecon"]
-	path = pipelines/viralrecon
-	url = https://github.com/nf-core/viralrecon.git
