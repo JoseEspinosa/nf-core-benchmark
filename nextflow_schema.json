@@ -64,6 +64,16 @@
                     "type": "string",
                     "fa_icon": "fas fa-file-code",
                     "description": "Path to the pipeline main Nextflow script."
+                },
+                "pipeline_test_config": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "description": "Path to the pipeline test configuration file."
+                },
+                "skip_emit": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "description": "Set if pipeline does not have an emit."
                 }
             }
         },
