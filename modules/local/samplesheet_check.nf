@@ -1,16 +1,13 @@
 // Import generic module functions
-include { saveFiles } from './functions'
+include { saveFiles; getProcessName } from './functions'
 
 params.options = [:]
 
-/*
- * Reformat design file and check validity
- */
 process SAMPLESHEET_CHECK {
     tag "$samplesheet"
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'pipeline_info', publish_id:'') }
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'pipeline_info', meta:[:], publish_by_meta:[]) }
 
     conda (params.enable_conda ? "conda-forge::python=3.8.3" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -21,12 +18,20 @@ process SAMPLESHEET_CHECK {
 
     input:
     path samplesheet
-    
-    output:
-    path '*.csv'
 
-    script:  // This script is bundled with the pipeline, in nf-core/benchmark/bin/
+    output:
+    path '*.csv'       , emit: csv
+    path "versions.yml", emit: versions
+
+    script: // This script is bundled with the pipeline, in nf-core/benchmark/bin/
     """
-    check_samplesheet.py $samplesheet samplesheet.valid.csv
+    check_samplesheet.py \\
+        $samplesheet \\
+        samplesheet.valid.csv
+
+    cat <<-END_VERSIONS > versions.yml
+    ${getProcessName(task.process)}:
+        python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS
     """
 }

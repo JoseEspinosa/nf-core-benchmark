@@ -1,6 +1,6 @@
-/*
- * Check input samplesheet and get read channels
- */
+//
+// Check input samplesheet and get read channels
+//
 
 params.options = [:]
 
@@ -9,19 +9,21 @@ include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check' addPa
 workflow INPUT_CHECK {
     take:
     samplesheet // file: /path/to/samplesheet.csv
-    
+
     main:
     SAMPLESHEET_CHECK ( samplesheet )
+        .csv
         .splitCsv ( header:true, sep:',' )
-        .map { get_sample_info(it) }
+        .map { create_fastq_channels(it) }
         .set { reads }
 
     emit:
-    reads // channel: [ val(meta), [ reads ] ]
+    reads                                     // channel: [ val(meta), [ reads ] ]
+    versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
 // Function to get list of [ meta, [ fastq_1, fastq_2 ] ]
-def get_sample_info(LinkedHashMap row) {
+def create_fastq_channels(LinkedHashMap row) {
     def meta = [:]
     meta.id           = row.sample
     meta.single_end   = row.single_end.toBoolean()
@@ -38,5 +40,5 @@ def get_sample_info(LinkedHashMap row) {
         }
         array = [ meta, [ file(row.fastq_1), file(row.fastq_2) ] ]
     }
-    return array    
+    return array
 }
