@@ -6,7 +6,8 @@ import org.yaml.snakeyaml.Yaml
 @Grab('com.xlson.groovycsv:groovycsv:1.0')
 import static com.xlson.groovycsv.CsvParser.parseCsv
 
-class WorkflowMainNfcoreBench {
+// TODO Check whether all this should be move to workflowBenchmark see https://github.com/nf-core/fetchngs/blob/dev/lib/WorkflowSra.groovy
+class WorkflowMain {
 
     // public static void get_pipeline_lib (workflow, pipelines_lib_dir, benchmarker_lib_dir) {
 
@@ -36,11 +37,12 @@ class WorkflowMainNfcoreBench {
     // TODO update
     public static String citation(workflow) {
         return "If you use ${workflow.manifest.name} for your analysis please cite:\n\n" +
-            "* The pipeline\n" +
-            "  TODO on release\n\n" +
+            // TODO nf-core: Add Zenodo DOI for pipeline after first release
+            //"* The pipeline\n" +
+            //"  https://doi.org/10.5281/zenodo.XXXXXXX\n\n" +
             "* The nf-core framework\n" +
             "  https://doi.org/10.1038/s41587-020-0439-x\n\n" +
-            "* Software dependencies\n" + // TODO
+            "* Software dependencies\n" +
             "  https://github.com/${workflow.manifest.name}/blob/master/CITATIONS.md"
     }
 
@@ -49,6 +51,7 @@ class WorkflowMainNfcoreBench {
     //
     public static String help(workflow, params, log) {
         def command = "nextflow run nf-core/benchmark --pipeline tcoffee --benchmarker bali_score -profile docker"
+        def command = "nextflow run ${workflow.manifest.name} --input samplesheet.csv --genome GRCh37 -profile docker"
         def help_string = ''
         help_string += NfcoreTemplate.logo(workflow, params.monochrome_logs)
         help_string += NfcoreSchema.paramsHelp(workflow, params, command)
@@ -87,6 +90,9 @@ class WorkflowMainNfcoreBench {
         // Print parameter summary log to screen
         log.info paramsSummaryLog(workflow, params, log)
 
+        // Check that a -profile or Nextflow config has been provided to run the pipeline
+        NfcoreTemplate.checkConfigProvided(workflow, log)
+
         // Check that conda channels are set-up correctly
         if (params.enable_conda) {
             Utils.checkCondaChannels(log)
@@ -94,9 +100,6 @@ class WorkflowMainNfcoreBench {
 
         // Check AWS batch settings
         NfcoreTemplate.awsBatch(workflow, params)
-
-        // Check the hostnames against configured profiles
-        NfcoreTemplate.hostName(workflow, params, log)
 
         // Check that working directory is set
         if (!params.benchmark_work) {
@@ -166,5 +169,15 @@ class WorkflowMainNfcoreBench {
         }
 
         return benchmark_dict.benchmarker
+    // Get attribute from genome config file e.g. fasta
+    //
+    public static String getGenomeAttribute(params, attribute) {
+        def val = ''
+        if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
+            if (params.genomes[ params.genome ].containsKey(attribute)) {
+                val = params.genomes[ params.genome ][ attribute ]
+            }
+        }
+        return val
     }
 }

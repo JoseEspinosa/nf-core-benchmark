@@ -3,9 +3,9 @@
 ========================================================================================
     nf-core/benchmark
 ========================================================================================
-    nf-core/benchmark Analysis Pipeline.
-    #### Homepage / Documentation
-    https://github.com/nf-core/benchmark
+    Github : https://github.com/nf-core/benchmark
+    Website: https://nf-co.re/benchmark
+    Slack  : https://nfcore.slack.com/channels/benchmark
 ----------------------------------------------------------------------------------------
 */
 
@@ -13,33 +13,11 @@ nextflow.enable.dsl = 2
 
 /*
 ========================================================================================
-    WORKFLOW VALUES
+    GENOME PARAMETER VALUES
 ========================================================================================
 */
 
-def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
-def multiqc_report = []
-
-/*
-========================================================================================
-    PIPELINE PARAMETER VALUES
-========================================================================================
-*/
-
-params.pipeline_path = "${params.pipelines_dir}/${params.pipeline}/main.nf"
-
-/*
-========================================================================================
-    BENCHMARKER PARAMETER VALUES
-========================================================================================
-*/
-
-params.skip_benchmark   = false
-
-if (!params.skip_benchmark) {
-    params.benchmarker      = WorkflowMainNfcoreBench.getBenchmarker(workflow, params, log)
-    params.benchmarker_path = "${params.benchmarkers_dir}/${params.benchmarker}/main.nf"
-}
+params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
 
 /*
 ========================================================================================
@@ -47,7 +25,7 @@ if (!params.skip_benchmark) {
 ========================================================================================
 */
 
-WorkflowMainNfcoreBench.initialise(workflow, params, log)
+WorkflowMain.initialise(workflow, params, log)
 
 /*
 ========================================================================================
@@ -55,34 +33,27 @@ WorkflowMainNfcoreBench.initialise(workflow, params, log)
 ========================================================================================
 */
 
-include { PIPELINE }    from './workflows/pipeline' //addParams( summary_params: summary_params )
+include { BENCHMARK } from './workflows/benchmark'
 
-if (!params.skip_benchmark) {
-    include { BENCHMARKER } from './workflows/benchmarker'
-}
-
-workflow  NFCORE_BENCHMARK {
-
-    PIPELINE ()
-
-    if (!params.skip_benchmark) {
-        BENCHMARKER (PIPELINE.out.pipeline)
-    }
-}
-
-workflow {
-    NFCORE_BENCHMARK ()
+//
+// WORKFLOW: Run main nf-core/benchmark analysis pipeline
+//
+workflow NFCORE_BENCHMARK {
+    BENCHMARK ()
 }
 
 /*
 ========================================================================================
-    COMPLETION EMAIL AND SUMMARY
+    RUN ALL WORKFLOWS
 ========================================================================================
 */
 
-workflow.onComplete {
-    NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
-    NfcoreTemplate.summary(workflow, params, log)
+//
+// WORKFLOW: Execute a single named workflow for the pipeline
+// See: https://github.com/nf-core/rnaseq/issues/619
+//
+workflow {
+    NFCORE_BENCHMARK ()
 }
 
 /*
