@@ -79,6 +79,11 @@
                     "type": "string",
                     "fa_icon": "fas fa-file-code",
                     "description": "Set if pipeline does not have an emit."
+                },
+                "skip_multiqc": {
+                    "type": "boolean",
+                    "description": "Skip MultiQC.",
+                    "fa_icon": "fas fa-fast-forward"
                 }
             }
         },
